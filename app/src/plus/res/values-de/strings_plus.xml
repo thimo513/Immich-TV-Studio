@@ -13,7 +13,24 @@
     <string name="plus_favorites">Favoriten</string>
     <string name="plus_places">Orte</string>
 
-    <string name="plus_search_title_empty">OK drücken, um in deinen Fotos zu suchen</string>
+    <string name="plus_search_title_empty">Wonach suchst du?</string>
+    <string name="studio_search_custom">Eigene Suche…</string>
+    <string name="studio_search_recent">Zuletzt gesucht</string>
+    <string name="studio_search_ideas">Ideen</string>
+    <string-array name="studio_search_suggestions">
+        <item>Berge</item>
+        <item>Strand</item>
+        <item>Sonnenuntergang</item>
+        <item>Schnee</item>
+        <item>Wald</item>
+        <item>See</item>
+        <item>Stadt</item>
+        <item>Hund</item>
+        <item>Katze</item>
+        <item>Essen</item>
+        <item>Geburtstag</item>
+        <item>Weihnachten</item>
+    </string-array>
     <string name="plus_search_title_with_query">Suche: %1$s (nach oben für neue Suche)</string>
     <string name="plus_search_dialog_title">Fotos suchen</string>
     <string name="plus_search_hint">z. B. Berge, Segelboot, Strand</string>

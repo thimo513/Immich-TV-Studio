@@ -255,15 +255,20 @@
     </style>
 
     <style name="IconCardImageStyle" parent="Widget.Leanback.ImageCardView.ImageStyle">
-        <item name="android:layout_width">96dp</item>
+        <!-- Studio: wide enough for German labels such as "Bildschirmschoner" -->
+        <item name="android:layout_width">150dp</item>
         <item name="android:layout_height">96dp</item>
-        <item name="android:padding">16dp</item>
+        <item name="android:padding">22dp</item>
+        <item name="android:scaleType">fitCenter</item>
     </style>
 
     <style name="IconCardTitleStyle" parent="Widget.Leanback.ImageCardView.TitleStyle">
         <item name="android:maxLines">2</item>
         <item name="android:minLines">2</item>
         <item name="android:gravity">center</item>
+        <item name="android:breakStrategy">balanced</item>
+        <item name="android:hyphenationFrequency">normal</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="IconCardInfoAreaStyle" parent="Widget.Leanback.ImageCardView.InfoAreaStyle">

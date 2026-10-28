@@ -44,8 +44,8 @@
 
     <color name="error_text">#EF9A9A</color>
 
-    <color name="settings_card_background">#0277BD</color>
-    <color name="settings_card_background_focussed">#01579B</color>
+    <color name="settings_card_background">#FF1B1F2A</color>
+    <color name="settings_card_background_focussed">#FF3A3F4C</color>
 
     <color name="progressbarColor">#ffffff</color>
 

@@ -1,6 +1,7 @@
 package nl.giejay.android.tv.immich.plus.search
 
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -21,6 +22,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -51,7 +53,8 @@ class SmartSearchFragment : GenericAssetFragment() {
         result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let { search(it) }
     }
 
-    private var emptyHint: TextView? = null
+    private var emptyHint: View? = null
+    private var focusResults = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,7 +78,9 @@ class SmartSearchFragment : GenericAssetFragment() {
                     val isOk = event.keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
                         event.keyCode == KeyEvent.KEYCODE_ENTER ||
                         event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER
-                    if ((isOk && assets.isEmpty()) || event.keyCode == KeyEvent.KEYCODE_DPAD_UP) {
+                    val isUp = event.keyCode == KeyEvent.KEYCODE_DPAD_UP
+                    // UP only counts above the results; on the start panel it is plain navigation
+                    if ((isOk && assets.isEmpty() && lastQuery != null) || (isUp && assets.isNotEmpty())) {
                         showSearchDialog()
                     }
                 }
@@ -85,19 +90,91 @@ class SmartSearchFragment : GenericAssetFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // own hint instead of a page title: a title overlaps the menu entry name ("Suche")
-        val hint = TextView(requireContext()).apply {
-            text = getString(R.string.plus_search_title_empty)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-            setTextColor(0xCCFFFFFF.toInt())
-            gravity = Gravity.CENTER
-            visibility = if (lastQuery == null) View.VISIBLE else View.GONE
-        }
-        emptyHint = hint
+        // start panel instead of a page title (a title overlaps the menu entry name "Suche"):
+        // own search, recent searches and ideas as buttons, all reachable with the D-pad
+        val panel = buildStartPanel()
+        emptyHint = panel
         (view as? FrameLayout)?.addView(
-            hint,
+            panel,
             FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER)
         )
+        showStartPanel(lastQuery == null)
+    }
+
+    /**
+     * The (empty) grid frame is focusable and would take the focus before the panel buttons, so
+     * only one of the two is ever visible.
+     */
+    private fun showStartPanel(show: Boolean) {
+        val gridFrame = view?.findViewById<View>(R.id.grid_frame)
+        if (show) {
+            emptyHint?.visibility = View.VISIBLE
+            gridFrame?.visibility = View.GONE
+        } else {
+            // hand the focus to the grid frame before the focused chip disappears, otherwise it
+            // falls back to the menu
+            gridFrame?.visibility = View.VISIBLE
+            gridFrame?.requestFocus()
+            emptyHint?.visibility = View.GONE
+        }
+    }
+
+    private fun buildStartPanel(): View {
+        val context = requireContext()
+        val density = resources.displayMetrics.density
+        fun dp(value: Int) = (value * density).toInt()
+
+        fun label(text: String, sizeSp: Float, topDp: Int) = TextView(context).apply {
+            this.text = text
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
+            setTextColor(ContextCompat.getColor(context, R.color.studio_text))
+            setPadding(0, dp(topDp), 0, dp(10))
+            gravity = Gravity.CENTER
+        }
+
+        fun chip(text: String, onClick: () -> Unit) = Button(context).apply {
+            this.text = text
+            isAllCaps = false
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+            setTextColor(ContextCompat.getColorStateList(context, R.color.studio_chip_text))
+            background = ContextCompat.getDrawable(context, R.drawable.studio_chip_bg)
+            minHeight = 0
+            minimumHeight = 0
+            stateListAnimator = null
+            setPadding(dp(22), dp(10), dp(22), dp(10))
+            setOnClickListener { onClick() }
+        }
+
+        fun row(items: List<View>) = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            items.forEach { addView(it, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(dp(6), dp(6), dp(6), dp(6)) }) }
+        }
+
+        return LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            addView(label(getString(R.string.plus_search_title_empty), 30f, 0))
+            addView(row(listOf(chip(getString(R.string.studio_search_custom)) { showSearchDialog() })))
+            val recent = recentSearches(context)
+            if (recent.isNotEmpty()) {
+                addView(label(getString(R.string.studio_search_recent), 16f, 18))
+                addView(row(recent.map { term -> chip(term) { search(term) } }))
+            }
+            addView(label(getString(R.string.studio_search_ideas), 16f, 18))
+            resources.getStringArray(R.array.studio_search_suggestions).toList().chunked(6).forEach { terms ->
+                addView(row(terms.map { term -> chip(term) { search(term) } }))
+            }
+        }
+    }
+
+    private fun recentSearches(context: Context): List<String> =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_RECENT, "")
+            .orEmpty().split(SEPARATOR).filter { it.isNotBlank() }
+
+    private fun rememberSearch(context: Context, term: String) {
+        val updated = (listOf(term) + recentSearches(context).filterNot { it.equals(term, ignoreCase = true) }).take(MAX_RECENT)
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY_RECENT, updated.joinToString(SEPARATOR)).apply()
     }
 
     override fun onDestroyView() {
@@ -106,6 +183,15 @@ class SmartSearchFragment : GenericAssetFragment() {
     }
 
     override fun createCard(a: Asset): Card = a.toDateCard()
+
+    override fun setData(assets: List<Asset>) {
+        super.setData(assets)
+        if (focusResults && adapter.size() > 0) {
+            focusResults = false
+            val grid = view?.findViewById<View>(androidx.leanback.R.id.browse_grid)
+            grid?.post { grid.requestFocus() }
+        }
+    }
 
     override suspend fun loadItems(
         apiClient: ApiClient,
@@ -120,18 +206,23 @@ class SmartSearchFragment : GenericAssetFragment() {
     override fun sortItems(items: List<Asset>): List<Asset> = items
 
     override fun openPopUpMenu() {
-        showSearchDialog()
+        // right edge of the results; on the start panel RIGHT is plain navigation between chips
+        if (lastQuery != null) showSearchDialog()
     }
 
     private fun search(query: String) {
         val trimmed = query.trim()
         if (trimmed.isEmpty() || !isAdded) return
         lastQuery = trimmed
+        rememberSearch(requireContext(), trimmed)
         ioScope.coroutineContext[Job]?.cancelChildren()
         clearState()
         allPagesLoaded = false
         progressBar?.visibility = View.VISIBLE
-        emptyHint?.visibility = View.GONE
+        showStartPanel(false)
+        // the pressed chip disappears with the panel: move the focus to the first result instead
+        // of letting it fall back to the menu
+        focusResults = true
         Toast.makeText(requireContext(), getString(R.string.plus_search_title_with_query, trimmed), Toast.LENGTH_LONG).show()
         fetchInitialItems()
     }
@@ -225,5 +316,9 @@ class SmartSearchFragment : GenericAssetFragment() {
         // survives switching pages and returning from the photo slider
         private var lastQuery: String? = null
         private const val FRESH_KEY_MS = 500L
+        private const val PREFS = "studio_search"
+        private const val KEY_RECENT = "recent"
+        private const val MAX_RECENT = 6
+        private const val SEPARATOR = "|"
     }
 }

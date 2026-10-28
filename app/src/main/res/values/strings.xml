@@ -231,7 +231,7 @@
     <string name="auth_demo_mode_desc">Login to a demo Immich instance.</string>
 
     <!-- Auth step 2 (GuidedStep) -->
-    <string name="login_immich_description">Login to your Immich server or try a demo.</string>
+    <string name="login_immich_description">Sign in to your Immich server with an API key.</string>
     <string name="server_url_hint">Server URL (http[s]://…)</string>
     <string name="disable_ssl_verification">Disable SSL verification</string>
     <string name="disable_ssl_verification_desc">Only use this when you have issues with self-signed certificates!</string>

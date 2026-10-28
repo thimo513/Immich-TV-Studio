@@ -192,7 +192,7 @@
     <string name="excluded_albums_desc">Medien aus bestimmten Alben bei Zufall/Dieser Tag ausschließen</string>
 
     <!-- Preference screens and categories -->
-    <string name="view_settings">Anzeige-Einstellungen</string>
+    <string name="view_settings">Anzeige</string>
     <string name="display">Anzeige</string>
     <string name="display_desc">Festlegen, wie Medien angezeigt werden</string>
     <string name="effects">Effekte</string>
@@ -210,7 +210,7 @@
     <string name="filtering">Filter</string>
 
     <!-- Home screen channels -->
-    <string name="home_screen_channels">Startbildschirm-Kanäle</string>
+    <string name="home_screen_channels">TV-Kanäle</string>
     <string name="home_screen_channels_settings">Startbildschirm-Kanäle</string>
     <string name="channel_recent_photos">Neueste Fotos</string>
     <string name="enable_home_screen_channels">Kanäle auf dem Startbildschirm</string>
@@ -230,7 +230,7 @@
     <string name="auth_demo_mode_desc">Bei einem Immich-Demoserver anmelden.</string>
 
     <!-- Auth step 2 (GuidedStep) -->
-    <string name="login_immich_description">Melde dich bei deinem Immich-Server an oder probiere die Demo.</string>
+    <string name="login_immich_description">Melde dich mit einem API-Key bei deinem Immich-Server an.</string>
     <string name="server_url_hint">Server-URL (http[s]://…)</string>
     <string name="disable_ssl_verification">SSL-Prüfung deaktivieren</string>
     <string name="disable_ssl_verification_desc">Nur nutzen, wenn es Probleme mit selbstsignierten Zertifikaten gibt!</string>
