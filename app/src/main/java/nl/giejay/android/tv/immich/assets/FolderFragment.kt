@@ -93,7 +93,7 @@ class FolderFragment : VerticalCardGridFragment<Item>() {
             val findAllAssets = this.assets.filter { it.item is Asset }.map { it.item as Asset }
             val sliderItems = findAllAssets.toSliderItems(keepOrder = true, mergePortrait = PreferenceManager.get(SLIDER_MERGE_PORTRAIT_PHOTOS))
             val config = MediaSliderConfiguration(
-                sliderItems.indexOfFirst { it.ids().contains(card.id) },
+                sliderItems.indexOfFirst { it.ids().contains(card.id) }.coerceAtLeast(0),
                 PreferenceManager.get(SLIDER_INTERVAL),
                 PreferenceManager.get(SLIDER_ONLY_USE_THUMBNAILS),
                 isVideoSoundEnable = true,

@@ -117,8 +117,8 @@ private fun startScreenSaverIntent(context: Context) {
             }
             return dialog.show()
         }
-        context.startActivity(intent);
     }
+    context.startActivity(intent)
 
 }
 

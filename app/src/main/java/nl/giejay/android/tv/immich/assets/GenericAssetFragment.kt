@@ -152,7 +152,7 @@ abstract class GenericAssetFragment : VerticalCardGridFragment<Asset>() {
                 if (!isAdded) return@withContext
                 progressBar?.visibility = View.GONE
                 val config = MediaSliderConfiguration(
-                    toSliderItems.indexOfFirst { it.ids().contains(card.id) },
+                    toSliderItems.indexOfFirst { it.ids().contains(card.id) }.coerceAtLeast(0),
                     PreferenceManager.get(SLIDER_INTERVAL),
                     PreferenceManager.get(SLIDER_ONLY_USE_THUMBNAILS),
                     isVideoSoundEnable = true,
@@ -180,7 +180,7 @@ abstract class GenericAssetFragment : VerticalCardGridFragment<Asset>() {
     }
 
     override fun getBackgroundPicture(it: Asset): String? {
-        return ApiUtil.getFileUrl(it.id, "IMAGE")
+        return ApiUtil.getThumbnailUrl(it.id, "preview")
     }
 
     override fun createCard(a: Asset): Card {

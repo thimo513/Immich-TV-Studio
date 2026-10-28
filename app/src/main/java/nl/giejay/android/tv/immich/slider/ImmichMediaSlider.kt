@@ -48,21 +48,25 @@ class ImmichMediaSlider : MediaSliderFragment() {
                 .setDefaultRequestProperties(mapOf("x-api-key" to PreferenceManager.get(API_KEY)))
         )
 
-        if (bundle.timelineView) {
+        // the configuration lives in the activity view model: add plugins only once
+        val alreadyConfigured = config.keyEventPlugins.any { it is nl.giejay.android.tv.immich.plus.zoom.ZoomPlugin }
+        if (bundle.timelineView && !alreadyConfigured) {
             val timelinePlugin = TimelineStoryProgressPlugin()
             config.viewPlugins += timelinePlugin
             config.controllerPlugins += timelinePlugin
             config.keyEventPlugins += timelinePlugin
         }
 
-        val enabledPlugins = PreferenceManager.createEnabledSliderPlugins(lifecycleScope, favoriteService)
-        config.controllerPlugins += enabledPlugins.controllerPlugins
-        config.viewPlugins += enabledPlugins.viewPlugins
-        config.keyEventPlugins += enabledPlugins.keyEventPlugins
-        // Immich TV Plus: zoom levels for photos (first in the key list, so it sees the arrow keys while zoomed)
-        nl.giejay.android.tv.immich.plus.zoom.ZoomPlugin().let { zoom ->
-            config.controllerPlugins += zoom
-            config.keyEventPlugins = listOf(zoom) + config.keyEventPlugins
+        if (!alreadyConfigured) {
+            val enabledPlugins = PreferenceManager.createEnabledSliderPlugins(lifecycleScope, favoriteService)
+            config.controllerPlugins += enabledPlugins.controllerPlugins
+            config.viewPlugins += enabledPlugins.viewPlugins
+            config.keyEventPlugins += enabledPlugins.keyEventPlugins
+            // zoom levels for photos (first in the key list, so it sees the arrow keys while zoomed)
+            nl.giejay.android.tv.immich.plus.zoom.ZoomPlugin().let { zoom ->
+                config.controllerPlugins += zoom
+                config.keyEventPlugins = listOf(zoom) + config.keyEventPlugins
+            }
         }
 
         loadMediaSliderView(config)
