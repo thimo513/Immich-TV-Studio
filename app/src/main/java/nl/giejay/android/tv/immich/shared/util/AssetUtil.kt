@@ -1,6 +1,7 @@
 package nl.giejay.android.tv.immich.shared.util
 
 import nl.giejay.mediaslider.model.SliderItem
+import nl.giejay.android.tv.immich.plus.toDateCard
 import nl.giejay.mediaslider.model.SliderItemType
 import nl.giejay.mediaslider.model.SliderItemViewHolder
 import nl.giejay.android.tv.immich.api.util.ApiUtil
@@ -147,10 +148,5 @@ fun List<Asset>.toCards(): List<Card> {
     }
 }
 
-fun Asset.toCard(): Card {
-    return Card(this.originalFileName ?: this.deviceAssetId ?: "",
-        this.exifInfo?.description ?: "",
-        this.id,
-        ApiUtil.getThumbnailUrl(this.id, "thumbnail"),
-        ApiUtil.getThumbnailUrl(this.id, "preview"))
-}
+// Studio: date and place instead of the file name, see plus/PlusCards.kt
+fun Asset.toCard(): Card = toDateCard()

@@ -25,6 +25,10 @@ import nl.giejay.android.tv.immich.assets.RandomAssetsFragment
 import nl.giejay.android.tv.immich.assets.RecentAssetsFragment
 import nl.giejay.android.tv.immich.assets.SimilarTimeAssetsFragment
 import nl.giejay.android.tv.immich.people.PeopleFragment
+import nl.giejay.android.tv.immich.plus.favorites.FavoritesFragment
+import nl.giejay.android.tv.immich.plus.home.StudioHomeFragment
+import nl.giejay.android.tv.immich.plus.places.PlacesFragment
+import nl.giejay.android.tv.immich.plus.search.SmartSearchFragment
 import nl.giejay.android.tv.immich.settings.SettingsFragment
 import nl.giejay.android.tv.immich.shared.fragment.GridFragment
 import nl.giejay.android.tv.immich.shared.prefs.HIDDEN_HOME_ITEMS
@@ -53,9 +57,10 @@ class HomeFragment : BrowseSupportFragment() {
         headersSupportFragment.setOnHeaderViewSelectedListener { _, row ->
             selectedPosition = row?.let { mRowsAdapter.indexOf(it) } ?: 0
             val name = row?.headerItem?.name ?: "-"
-            // Timeline is a full-bleed mosaic — never show the Leanback page title there
-            // (it flashes and slides away when entering the page).
-            if (name == getString(R.string.timeline)) {
+            // Full-bleed pages (timeline, start, search) never show the Leanback page title
+            // (it flashes and slides away when entering the page, or overlaps their content).
+            val header = row?.headerItem?.id?.toInt()?.let { HEADERS.getOrNull(it) }
+            if (header?.showsTitle == false) {
                 title = ""
                 showTitle(false)
             } else {
@@ -89,7 +94,7 @@ class HomeFragment : BrowseSupportFragment() {
     private fun setupUi() {
         headersState = HEADERS_ENABLED
         isHeadersTransitionOnBackEnabled = true
-        brandColor = resources.getColor(android.R.color.black)
+        brandColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.studio_menu_bg)
         // First page is Timeline, which never shows a Browse title.
         title = ""
         showTitle(false)
@@ -119,7 +124,7 @@ class HomeFragment : BrowseSupportFragment() {
     }
 
     private fun createRows(): List<PageRow> {
-        return HEADERS.mapIndexed { index, header -> PageRow(HeaderItem(index.toLong(), header.name)) }
+        return HEADERS.mapIndexed { index, header -> PageRow(IconHeaderItem(index.toLong(), header.name, header.icon)) }
     }
 
     private class PageRowFragmentFactory : FragmentFactory<Fragment>() {
@@ -131,24 +136,37 @@ class HomeFragment : BrowseSupportFragment() {
     }
 
     companion object {
+        private fun text(id: Int) = ImmichApplication.appContext!!.getString(id)
+
         private val HEADERS: List<Header> = listOf(
-            Header(ImmichApplication.appContext!!.getString(R.string.timeline)) { TimelineFragment() },
-            *nl.giejay.android.tv.immich.plus.PlusMenu.headers(), // Immich TV Plus: search, favorites, places
-            Header(ImmichApplication.appContext!!.getString(R.string.albums)) {
+            Header(text(R.string.studio_start), R.drawable.studio_ic_home, showsTitle = false) { StudioHomeFragment() },
+            Header(text(R.string.plus_search), R.drawable.studio_ic_search, showsTitle = false) { SmartSearchFragment() },
+            Header(text(R.string.timeline), R.drawable.studio_ic_timeline, showsTitle = false) { TimelineFragment() },
+            Header(text(R.string.plus_favorites), R.drawable.studio_ic_favorite) { FavoritesFragment() },
+            Header(text(R.string.plus_places), R.drawable.studio_ic_place) { PlacesFragment() },
+            Header(text(R.string.people), R.drawable.studio_ic_person) { PeopleFragment() },
+            Header(text(R.string.albums), R.drawable.studio_ic_album) {
                 AlbumFragment().apply {
                     arguments = bundleOf("selectionMode" to false)
                 }
             },
-            Header(ImmichApplication.appContext!!.getString(R.string.photos)) { AllAssetFragment() },
-            Header(ImmichApplication.appContext!!.getString(R.string.random)) { RandomAssetsFragment() },
-            Header(ImmichApplication.appContext!!.getString(R.string.people)) { PeopleFragment() },
-            Header(ImmichApplication.appContext!!.getString(R.string.recent)) { RecentAssetsFragment() },
-            Header(ImmichApplication.appContext!!.getString(R.string.seasonal)) { SimilarTimeAssetsFragment() },
-            Header(ImmichApplication.appContext!!.getString(R.string.folders)) { FolderFragment() },
-            Header(ImmichApplication.appContext!!.getString(R.string.edit)) { GridFragment(hideProgressBar = true) },
-            Header(ImmichApplication.appContext!!.getString(R.string.settings)) { SettingsFragment() },
+            Header(text(R.string.photos), R.drawable.studio_ic_photo) { AllAssetFragment() },
+            Header(text(R.string.random), R.drawable.studio_ic_shuffle) { RandomAssetsFragment() },
+            Header(text(R.string.recent), R.drawable.studio_ic_recent) { RecentAssetsFragment() },
+            Header(text(R.string.seasonal), R.drawable.studio_ic_event) { SimilarTimeAssetsFragment() },
+            Header(text(R.string.folders), R.drawable.studio_ic_folder) { FolderFragment() },
+            Header(text(R.string.edit), R.drawable.studio_ic_edit) { GridFragment(hideProgressBar = true) },
+            Header(text(R.string.settings), R.drawable.studio_ic_settings) { SettingsFragment() },
         )
     }
 }
 
-class Header(val name: String, var show: Boolean = false, val fragment: () -> Fragment)
+class Header(
+    val name: String,
+    @androidx.annotation.DrawableRes val icon: Int,
+    val showsTitle: Boolean = true,
+    val fragment: () -> Fragment
+)
+
+/** Menu entry with an icon, shown by [ImmichRowPresenter]. */
+class IconHeaderItem(id: Long, name: String, @androidx.annotation.DrawableRes val icon: Int) : HeaderItem(id, name)

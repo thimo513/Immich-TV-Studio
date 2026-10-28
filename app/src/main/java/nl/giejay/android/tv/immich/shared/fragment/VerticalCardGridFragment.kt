@@ -30,6 +30,7 @@ import nl.giejay.android.tv.immich.api.ApiClient
 import nl.giejay.android.tv.immich.api.ApiClientConfig
 import nl.giejay.android.tv.immich.card.Card
 import nl.giejay.android.tv.immich.card.CardPresenterSelector
+import nl.giejay.android.tv.immich.plus.ui.CardShape
 import nl.giejay.android.tv.immich.home.HomeFragmentDirections
 import nl.giejay.android.tv.immich.shared.prefs.API_KEY
 import nl.giejay.android.tv.immich.shared.prefs.DEBUG_MODE
@@ -62,6 +63,10 @@ abstract class VerticalCardGridFragment<ITEM> : GridFragment() {
     protected val selectionMode: Boolean
         get() = arguments?.getBoolean("selectionMode", false) ?: false
     private var currentSelectedIndex: Int = 0
+
+    /** Columns of the grid; square cards (faces) fit more per row. */
+    protected open val columns: Int = COLUMNS
+    protected open val cardShape: CardShape = CardShape.WIDE
 
     abstract fun sortItems(items: List<ITEM>): List<ITEM>
     abstract suspend fun loadItems(
@@ -107,7 +112,7 @@ abstract class VerticalCardGridFragment<ITEM> : GridFragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 keyEvents.state.collect {
                     // open popup menu on the right side if its the last photo in the row and user presses right button
-                    if (it?.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && ((adapter.size() == 0 && allPagesLoaded) || currentSelectedIndex > 0 && (currentSelectedIndex % COLUMNS == 3 || currentSelectedIndex + 1 == adapter.size()))) {
+                    if (it?.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && ((adapter.size() == 0 && allPagesLoaded) || currentSelectedIndex > 0 && (currentSelectedIndex % columns == columns - 1 || currentSelectedIndex + 1 == adapter.size()))) {
                         openPopUpMenu()
                     } else if (it?.keyCode == KeyEvent.KEYCODE_FORWARD || it?.keyCode == KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD || it?.keyCode == KeyEvent.KEYCODE_MEDIA_FAST_FORWARD) {
                         updateManualPositionHandler(adapter.size() - 1)
@@ -239,9 +244,9 @@ abstract class VerticalCardGridFragment<ITEM> : GridFragment() {
 
     private fun setupAdapter() {
         val presenter = VerticalGridPresenter(ZOOM_FACTOR, false) // Immich TV Plus: no dimming of unfocused thumbnails
-        presenter.numberOfColumns = COLUMNS
+        presenter.numberOfColumns = columns
         gridPresenter = presenter
-        val cardPresenter = CardPresenterSelector(requireContext())
+        val cardPresenter = CardPresenterSelector(requireContext(), cardShape)
         adapter = ArrayObjectAdapter(cardPresenter)
     }
 
@@ -310,8 +315,10 @@ abstract class VerticalCardGridFragment<ITEM> : GridFragment() {
             Timber.i("Could not load background because background url is null")
             return
         }
-        val width: Int = mMetrics.widthPixels
-        val height: Int = mMetrics.heightPixels
+        // Studio: an ambient backdrop instead of the full photo: a tiny version (soft when scaled
+        // up by the BackgroundManager) under a dark tint, so it never competes with the cards
+        val width: Int = (mMetrics.widthPixels / 24).coerceAtLeast(1)
+        val height: Int = (mMetrics.heightPixels / 24).coerceAtLeast(1)
         try {
             Glide.with(requireActivity())
                 .load(backgroundUrl)
@@ -324,7 +331,10 @@ abstract class VerticalCardGridFragment<ITEM> : GridFragment() {
                         // Fragment may already be gone (e.g. user switched to Timeline).
                         if (!isAdded || !isResumed) return
                         try {
-                            mBackgroundManager?.drawable = resource
+                            (resource as? android.graphics.drawable.BitmapDrawable)?.isFilterBitmap = true
+                            mBackgroundManager?.drawable = android.graphics.drawable.LayerDrawable(
+                                arrayOf(resource, android.graphics.drawable.ColorDrawable(0xD910131A.toInt()))
+                            )
                         } catch (e: Exception) {
                             Timber.e(e, "Could not set background")
                         }

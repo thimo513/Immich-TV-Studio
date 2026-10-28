@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="studio_start">Home</string>
+    <string name="studio_row_memories">Memories</string>
+    <string name="studio_row_recent">Newest photos</string>
+    <string name="studio_row_random">Rediscover</string>
+    <plurals name="studio_photo_count">
+        <item quantity="one">%d photo</item>
+        <item quantity="other">%d photos</item>
+    </plurals>
+
     <string name="plus_search">Search</string>
     <string name="plus_favorites">Favorites</string>
     <string name="plus_places">Places</string>

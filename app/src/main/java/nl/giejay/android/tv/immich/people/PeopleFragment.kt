@@ -10,6 +10,8 @@ import nl.giejay.android.tv.immich.home.HomeFragmentDirections
 import nl.giejay.android.tv.immich.shared.fragment.VerticalCardGridFragment
 
 class PeopleFragment : VerticalCardGridFragment<Person>() {
+    override val columns = 6
+    override val cardShape = nl.giejay.android.tv.immich.plus.ui.CardShape.SQUARE
 
     override fun sortItems(items: List<Person>): List<Person> {
        return items
@@ -50,7 +52,7 @@ class PeopleFragment : VerticalCardGridFragment<Person>() {
             "",
             a.id.toString(),
             ApiUtil.getPersonThumbnail(a.id),
-            ApiUtil.getPersonThumbnail(a.id),
+            null,
             false
         )
     }

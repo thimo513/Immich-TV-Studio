@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Immich TV Studio palette: deep blue-black surfaces, warm gold accent (matches the banner) -->
+    <color name="studio_bg">#FF10131A</color>
+    <color name="studio_menu_bg">#FF0B0D12</color>
+    <color name="studio_surface">#FF1B1F2A</color>
+    <color name="studio_accent">#FFFFC43C</color>
+    <color name="studio_text">#FFF1F3F8</color>
+    <color name="studio_text_dim">#B3F1F3F8</color>
+    <color name="studio_focus_pill">#2EFFFFFF</color>
+
+    <style name="StudioBrowseTitle" parent="Widget.Leanback.Title.Text">
+        <item name="android:textSize">28sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/studio_text</item>
+    </style>
+
+    <style name="StudioRowHeader" parent="Widget.Leanback.Row.Header">
+        <item name="android:textSize">20sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/studio_text</item>
+    </style>
+</resources>

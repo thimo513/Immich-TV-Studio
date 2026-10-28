@@ -2,7 +2,10 @@ package nl.giejay.android.tv.immich.plus.zoom
 
 import android.app.Dialog
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.PointF
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
@@ -17,6 +20,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.children
 import androidx.viewpager.widget.ViewPager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DecodeFormat
+import com.bumptech.glide.load.resource.bitmap.DownsampleStrategy
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
+import nl.giejay.android.tv.immich.api.util.ApiUtil
 import nl.giejay.android.tv.immich.R
 import nl.giejay.mediaslider.model.SliderItemType
 import nl.giejay.mediaslider.plugin.ControllerButtonPlacement
@@ -116,6 +125,7 @@ class ZoomPlugin : SliderControllerPlugin, SliderKeyEventPlugin {
         image.maxZoom = MAX_ZOOM
         if (level <= 1f) image.resetZoom() else image.setZoom(level)
         context.controller.hideOverlayControls()
+        if (level > 1f) loadFullResolution(image, context.sliderItem.mainItem.id)
         // the matrix is applied on the next layout pass, read the visible part after it
         image.post { updateMiniMap(image) }
         if (level > 1f) {
@@ -176,6 +186,37 @@ class ZoomPlugin : SliderControllerPlugin, SliderKeyEventPlugin {
         image.setScrollPosition(x.coerceIn(0f, 1f), y.coerceIn(0f, 1f))
     }
 
+    private var sharpAssetId: String? = null
+
+    /**
+     * The viewer shows the preview (about 1440 px), which gets soft when zoomed. Immich's
+     * "fullsize" rendition is the full resolution as JPEG (also for HEIC originals); it replaces the
+     * preview once loaded, keeping zoom and position. Capped at 4096 px in RGB_565 for TV memory.
+     */
+    private fun loadFullResolution(image: TouchImageView, assetId: String) {
+        if (sharpAssetId == assetId) return
+        val url = ApiUtil.getThumbnailUrl(assetId, "fullsize") ?: return
+        Glide.with(image).asBitmap().load(url)
+            .format(DecodeFormat.PREFER_RGB_565)
+            .override(4096)
+            .downsample(DownsampleStrategy.CENTER_INSIDE)
+            .into(object : CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    if (!image.isAttachedToWindow || currentImageView() !== image) return
+                    val zoom = image.currentZoom
+                    val center = image.scrollPosition ?: PointF(0.5f, 0.5f)
+                    image.setImageBitmap(resource)
+                    image.post {
+                        image.setZoom(zoom, center.x, center.y)
+                        updateMiniMap(image)
+                    }
+                    sharpAssetId = assetId
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) = Unit
+            })
+    }
+
     private var miniMap: ZoomMiniMapView? = null
 
     /** Small overview in the lower right corner: the whole photo and the part that is visible. */
@@ -188,9 +229,10 @@ class ZoomPlugin : SliderControllerPlugin, SliderKeyEventPlugin {
         val decor = image.rootView as? FrameLayout ?: return
         val map = miniMap ?: ZoomMiniMapView(image.context).also { view ->
             val density = image.resources.displayMetrics.density
-            decor.addView(view, FrameLayout.LayoutParams((160 * density).toInt(), (160 * density).toInt(), Gravity.BOTTOM or Gravity.END).apply {
+            // top right: the lower corners hold the photo's place, date and counter
+            decor.addView(view, FrameLayout.LayoutParams((160 * density).toInt(), (160 * density).toInt(), Gravity.TOP or Gravity.END).apply {
                 rightMargin = (32 * density).toInt()
-                bottomMargin = (32 * density).toInt()
+                topMargin = (24 * density).toInt()
             })
             miniMap = view
         }
@@ -199,6 +241,7 @@ class ZoomPlugin : SliderControllerPlugin, SliderKeyEventPlugin {
     }
 
     private fun hideMiniMap() {
+        sharpAssetId = null
         miniMap?.let { (it.parent as? ViewGroup)?.removeView(it) }
         miniMap = null
     }
