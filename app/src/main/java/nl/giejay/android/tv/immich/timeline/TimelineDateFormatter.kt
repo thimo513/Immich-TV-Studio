@@ -29,11 +29,14 @@ object TimelineDateFormatter {
             date == now.minusDays(1) -> yesterdayLabel
             daysAgo in 2..6 -> date.dayOfWeek.getDisplayName(TextStyle.FULL, locale)
             date.year == now.year ->
-                date.format(DateTimeFormatter.ofPattern("EEE, MMM d", locale))
+                date.format(DateTimeFormatter.ofPattern(if (dayFirst(locale)) "EEE, d. MMM" else "EEE, MMM d", locale))
             else ->
-                date.format(DateTimeFormatter.ofPattern("EEE, MMM d, yyyy", locale))
+                date.format(DateTimeFormatter.ofPattern(if (dayFirst(locale)) "EEE, d. MMM yyyy" else "EEE, MMM d, yyyy", locale))
         }
     }
+
+    // German-speaking locales write the day before the month ("Do., 21. Nov.")
+    private fun dayFirst(locale: Locale) = locale.language == "de"
 
     /**
      * Row header label for a month bucket (`YYYY-MM-01`). Kept for compatibility.
