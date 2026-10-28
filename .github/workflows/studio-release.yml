@@ -1,0 +1,95 @@
+# Immich TV Studio: builds a signed APK for every change on main and publishes it as a release.
+# The in-app updater installs the newest release (tag studio-<versionCode>, asset ImmichTVStudio.apk).
+#
+# Secrets: RELEASE_KEYSTORE_BASE64, RELEASE_KEYSTORE_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD
+name: Studio - build and release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: studio-release
+  cancel-in-progress: false
+
+env:
+  GH_REPO: ${{ github.repository }}
+  APK_NAME: ImmichTVStudio.apk
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Decide version
+        id: plan
+        run: |
+          if git tag --points-at HEAD | grep -q '^studio-'; then
+            echo "This commit is already released"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          base_code=$(grep -m1 'versionCode' app/build.gradle | grep -o '[0-9]\+')
+          last=$(git tag --list "studio-${base_code}[0-9][0-9][0-9]" | sed 's/^studio-//' | sort -n | tail -1)
+          if [ -z "$last" ]; then build=1; else build=$(( last - base_code * 1000 + 1 )); fi
+          base_name=$(grep -m1 'versionName' app/build.gradle | grep -o '"[^"]*"' | tr -d '"')
+          echo "release=true" >> "$GITHUB_OUTPUT"
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+          echo "code=$(( base_code * 1000 + build ))" >> "$GITHUB_OUTPUT"
+          echo "name=${base_name}-studio.${build}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 17
+        if: steps.plan.outputs.release == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Build signed APK
+        if: steps.plan.outputs.release == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          PLUS_BUILD_NUMBER: ${{ steps.plan.outputs.build }}
+          PLUS_UPDATE_REPO: ${{ github.repository }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Secret RELEASE_KEYSTORE_BASE64 fehlt"
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
+          export RELEASE_KEYSTORE_PATH="$RUNNER_TEMP/release.jks"
+          chmod +x gradlew
+          ./gradlew assembleRelease testReleaseUnitTest
+          cp "$(ls -1 app/build/outputs/apk/release/*.apk | head -n 1)" "$APK_NAME"
+
+      - name: Publish release
+        if: steps.plan.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="studio-${{ steps.plan.outputs.code }}"
+          previous=$(git tag --list 'studio-*' | sort -V | tail -1)
+          {
+            echo "Änderungen:"
+            if [ -n "$previous" ]; then
+              git log --no-merges --pretty='- %s' "$previous"..HEAD | head -40
+            else
+              git log --no-merges --pretty='- %s' -15
+            fi
+          } > notes.md
+          gh release create "$tag" "$APK_NAME" \
+            --target "$(git rev-parse HEAD)" \
+            --title "Immich TV Studio ${{ steps.plan.outputs.name }}" \
+            --notes-file notes.md \
+            --latest

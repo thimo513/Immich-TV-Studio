@@ -18,7 +18,7 @@
     <string name="plus_zoom_hint">%1$dx: arrow keys move the picture, Back zooms out</string>
 
     <string name="plus_update_title">Update available</string>
-    <string name="plus_update_message">Immich TV Plus %1$s is available.</string>
+    <string name="plus_update_message">Immich TV Studio %1$s is available.</string>
     <string name="plus_update_install">Install now</string>
     <string name="plus_update_later">Later</string>
     <string name="plus_update_downloading">Downloading update…</string>

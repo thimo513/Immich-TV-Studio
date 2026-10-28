@@ -35,14 +35,14 @@ data class GithubReleaseAsset(
 )
 
 /**
- * Self-update from the GitHub releases of the fork (see .github/workflows/plus-sync.yml).
+ * Self-update from the GitHub releases of the fork (see .github/workflows/studio-release.yml).
  *
- * Releases are tagged "plus-<versionCode>" and carry the APK as [APK_NAME]. A newer versionCode
+ * Releases are tagged "studio-<versionCode>" and carry the APK as [APK_NAME]. A newer versionCode
  * is downloaded and handed to the system installer, which asks the user for confirmation.
  */
 object UpdateChecker {
-    const val APK_NAME = "ImmichTVPlus.apk"
-    private const val TAG_PREFIX = "plus-"
+    const val APK_NAME = "ImmichTVStudio.apk"
+    private const val TAG_PREFIX = "studio-"
     private const val PREFS = "plus_updater"
     private const val KEY_LAST_CHECK = "last_check"
     private val CHECK_INTERVAL_MS = TimeUnit.HOURS.toMillis(24)

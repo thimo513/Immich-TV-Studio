@@ -1,11 +1,10 @@
-// Immich TV Plus: every build difference to the upstream app lives in this file, so that
-// app/build.gradle only needs one extra line ("apply from: 'plus.gradle'") and merges cleanly.
+// Immich TV Studio: app identity, versioning and the extra source sets (src/plus).
 
-def plusApplicationId = "nl.giejay.android.tv.immich.plus"
-// set by .github/workflows/plus-sync.yml, 0 for local builds
+def plusApplicationId = "nl.giejay.android.tv.immich.studio"
+// set by .github/workflows/studio-release.yml, 0 for local builds
 def plusBuildNumber = (System.getenv("PLUS_BUILD_NUMBER") ?: "0") as Integer
 // owner/repo whose GitHub releases the in-app updater checks
-def plusUpdateRepo = System.getenv("PLUS_UPDATE_REPO") ?: System.getenv("GITHUB_REPOSITORY") ?: "thimo513/Immich-Android-TV"
+def plusUpdateRepo = System.getenv("PLUS_UPDATE_REPO") ?: System.getenv("GITHUB_REPOSITORY") ?: "thimo513/Immich-TV-Studio"
 
 def upstreamVersionCode = android.defaultConfig.versionCode
 def upstreamVersionName = android.defaultConfig.versionName
@@ -15,7 +14,7 @@ android {
         applicationId plusApplicationId
         // always higher than the previous plus build, also when upstream bumps its own versionCode
         versionCode upstreamVersionCode * 1000 + plusBuildNumber
-        versionName "${upstreamVersionName}-plus.${plusBuildNumber}"
+        versionName "${upstreamVersionName}-studio.${plusBuildNumber}"
         buildConfigField "String", "PLUS_UPDATE_REPO", "\"${plusUpdateRepo}\""
     }
 
