@@ -3,6 +3,8 @@ package nl.giejay.android.tv.immich.plus
 import nl.giejay.android.tv.immich.api.model.Asset
 import nl.giejay.android.tv.immich.api.util.ApiUtil
 import nl.giejay.android.tv.immich.card.Card
+import nl.giejay.android.tv.immich.shared.prefs.PreferenceManager
+import nl.giejay.android.tv.immich.shared.prefs.SLIDER_LOAD_EDITED_PHOTO
 import java.text.DateFormat
 import java.util.Locale
 
@@ -14,8 +16,8 @@ fun Asset.toDateCard(): Card {
         caption,
         listOfNotNull(exifInfo?.city, exifInfo?.country).joinToString(", "),
         id,
-        ApiUtil.getThumbnailUrl(id, "thumbnail"),
-        ApiUtil.getThumbnailUrl(id, "preview"),
+        ApiUtil.getThumbnailUrl(id, "thumbnail", PreferenceManager.get(SLIDER_LOAD_EDITED_PHOTO)),
+        ApiUtil.getThumbnailUrl(id, "preview", PreferenceManager.get(SLIDER_LOAD_EDITED_PHOTO)),
         videoDuration = if (type == "VIDEO") formatVideoDuration(duration) else null
     )
 }

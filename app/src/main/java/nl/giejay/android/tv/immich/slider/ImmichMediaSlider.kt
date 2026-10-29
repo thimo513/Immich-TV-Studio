@@ -13,6 +13,8 @@ import nl.giejay.android.tv.immich.R
 import nl.giejay.android.tv.immich.shared.prefs.API_KEY
 import nl.giejay.android.tv.immich.shared.prefs.PreferenceManager
 import nl.giejay.android.tv.immich.plus.viewer.StudioInfoOverlayPlugin
+import nl.giejay.android.tv.immich.plus.viewer.StudioInfoPanelPlugin
+import nl.giejay.android.tv.immich.plus.viewer.StudioRotatePlugin
 import nl.giejay.mediaslider.plugin.DateOverlayViewPlugin
 import nl.giejay.mediaslider.plugin.MetadataViewPlugin
 import nl.giejay.mediaslider.plugin.TimelineStoryProgressPlugin
@@ -66,13 +68,18 @@ class ImmichMediaSlider : MediaSliderFragment() {
             // instead of the configurable metadata lists and the separate date line
             val isOldInfo = { plugin: Any -> plugin is MetadataViewPlugin || plugin is DateOverlayViewPlugin }
             val info = StudioInfoOverlayPlugin()
-            config.controllerPlugins += enabledPlugins.controllerPlugins.filterNot(isOldInfo) + info
-            config.viewPlugins += enabledPlugins.viewPlugins.filterNot(isOldInfo) + info
+            // Studio: info panel and rotation (both buttons sit before the slideshow buttons)
+            val details = StudioInfoPanelPlugin(info)
+            val rotate = StudioRotatePlugin(lifecycleScope)
+            config.controllerPlugins += enabledPlugins.controllerPlugins.filterNot(isOldInfo) + info + details + rotate
+            config.viewPlugins += enabledPlugins.viewPlugins.filterNot(isOldInfo) + info + details + rotate
             config.keyEventPlugins += enabledPlugins.keyEventPlugins
             // zoom levels for photos (first in the key list, so it sees the arrow keys while zoomed)
             nl.giejay.android.tv.immich.plus.zoom.ZoomPlugin().let { zoom ->
                 config.controllerPlugins += zoom
-                config.keyEventPlugins = listOf(zoom) + config.keyEventPlugins
+                // the info panel first: Back closes it before anything else
+                config.keyEventPlugins = listOfNotNull(config.controllerPlugins.filterIsInstance<StudioInfoPanelPlugin>().firstOrNull(), zoom) +
+                    config.keyEventPlugins
             }
         }
 

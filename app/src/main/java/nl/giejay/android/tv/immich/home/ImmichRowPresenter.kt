@@ -28,7 +28,10 @@ class ImmichRowPresenter : Presenter() {
 
         if (editMode) {
             if (headerItem?.name == viewHolder.view.context.getString(R.string.edit)) {
+                // "Done" ends the edit mode, it cannot be hidden itself
                 vh.tvTitle.text = viewHolder.view.context.getString(R.string.done)
+                vh.menuIcon.setImageResource(R.drawable.studio_ic_check)
+                vh.icon.visibility = View.GONE
             } else {
                 vh.icon.visibility = View.VISIBLE
                 if (PreferenceManager.itemInStringSet(headerItem?.name, HIDDEN_HOME_ITEMS)) {

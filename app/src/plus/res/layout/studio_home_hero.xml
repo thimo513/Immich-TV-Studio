@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/studio_hero"
     android:layout_width="match_parent"
-    android:layout_height="380dp"
+    android:layout_height="440dp"
     android:clipChildren="true"
     android:focusable="false"
     android:importantForAccessibility="no">
@@ -45,8 +45,8 @@
 
             <ImageView
                 android:id="@+id/studio_hero_icon"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_marginEnd="14dp"
                 android:importantForAccessibility="no" />
 
@@ -59,7 +59,7 @@
                 android:shadowColor="#99000000"
                 android:shadowRadius="12"
                 android:textColor="@color/studio_peach"
-                android:textSize="34sp"
+                android:textSize="40sp"
                 tools:text="Guten Abend, Ralph" />
         </LinearLayout>
 
@@ -67,13 +67,13 @@
             android:id="@+id/studio_hero_subline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="48dp"
+            android:layout_marginStart="54dp"
             android:layout_marginTop="2dp"
             android:maxLines="1"
             android:shadowColor="#99000000"
             android:shadowRadius="10"
             android:textColor="@color/studio_text_dim"
-            android:textSize="17sp"
+            android:textSize="19sp"
             tools:text="Heute vor 3 Jahren: 12 Fotos" />
     </LinearLayout>
 </FrameLayout>

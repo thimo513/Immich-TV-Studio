@@ -60,6 +60,21 @@
     <string name="studio_greeting_evening">Guten Abend, %1$s</string>
     <string name="studio_greeting_night">Gute Nacht, %1$s</string>
     <string name="studio_hero_memory">Heute %1$s: %2$s</string>
+
+    <string name="studio_info">Infos</string>
+    <string name="studio_info_title">Foto-Infos</string>
+    <string name="studio_info_date">Datum</string>
+    <string name="studio_info_time">Uhrzeit</string>
+    <string name="studio_info_place">Ort</string>
+    <string name="studio_info_people">Personen</string>
+    <string name="studio_info_camera">Kamera</string>
+    <string name="studio_info_album">Album</string>
+    <string name="studio_info_description">Beschreibung</string>
+    <string name="studio_info_file">Datei</string>
+    <string name="studio_rotate">Drehen</string>
+    <string name="studio_rotate_save">Drehung speichern</string>
+    <string name="studio_rotate_saved">Drehung gespeichert</string>
+    <string name="studio_rotate_failed">Drehung konnte nicht gespeichert werden: %1$s</string>
     <string name="studio_error_connection">Gerade keine Verbindung zum Immich-Server. Ist der Server an und der Fernseher im Netz?</string>
     <string name="studio_error_auth">Der Immich-Server hat die Anmeldung abgelehnt. Bitte gleich nochmal versuchen; passiert das öfter, den API-Schlüssel in den Einstellungen prüfen.</string>
 </resources>

@@ -10,5 +10,5 @@ object StudioAmbient {
     const val HEIGHT_PX = 3
 
     /** Darkens the colours just enough for text and cards to stay readable. */
-    val TINT = 0xB817120F.toInt()
+    val TINT = 0xA317120F.toInt()
 }

@@ -1,5 +1,6 @@
 package nl.giejay.android.tv.immich.plus.viewer
 
+import android.content.Context
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
@@ -31,6 +32,16 @@ class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin 
     private var whereView: View? = null
     private var shownAssetId: String? = null
     private var controlsVisible = false
+
+    /** Set while the info panel is open: it shows all of this already. */
+    var suppressed = false
+        set(value) {
+            field = value
+            if (value) {
+                root?.removeCallbacks(hide)
+                fade(false)
+            }
+        }
     private val hide = Runnable { fade(false) }
 
     override fun attachView(rootView: ConstraintLayout, state: Unit?) {
@@ -72,7 +83,7 @@ class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin 
             val time = item.get(MetaDataType.TIME)?.trim().orEmpty()
             val place = listOfNotNull(item.get(MetaDataType.CITY), item.get(MetaDataType.COUNTRY))
                 .map { it.trim() }.filter { it.isNotEmpty() }.distinct().joinToString(", ")
-            val people = item.get(MetaDataType.PEOPLE)?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }.orEmpty()
+            val people = formatPeople(context.context, item.get(MetaDataType.PEOPLE))
             withContext(Dispatchers.Main) {
                 if (shownAssetId != item.id) return@withContext
                 show(date, time, place, people)
@@ -80,23 +91,21 @@ class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin 
         }
     }
 
-    private fun show(date: String, time: String, place: String, people: List<String>) {
+    private fun show(date: String, time: String, place: String, names: String) {
         val view = root ?: return
         dateView?.text = date
         dateView?.visibility = if (date.isEmpty()) View.GONE else View.VISIBLE
-        val shortTime = TIME_WITH_SECONDS.matchEntire(time)?.groupValues?.get(1) ?: time
-        timeView?.text = if (shortTime.isEmpty()) "" else view.context.getString(R.string.studio_time_of_day, shortTime)
-        timeView?.visibility = if (shortTime.isEmpty()) View.GONE else View.VISIBLE
+        val timeOfDay = formatTimeOfDay(view.context, time)
+        timeView?.text = timeOfDay
+        timeView?.visibility = if (timeOfDay == null) View.GONE else View.VISIBLE
         view.findViewById<View>(R.id.studio_info_when).visibility =
-            if (date.isEmpty() && shortTime.isEmpty()) View.GONE else View.VISIBLE
+            if (date.isEmpty() && timeOfDay == null) View.GONE else View.VISIBLE
         placeView?.text = place
         placeView?.visibility = if (place.isEmpty()) View.GONE else View.VISIBLE
-        // "Anna, Papa und Leo"
-        val names = if (people.size < 2) people.joinToString() else
-            people.dropLast(1).joinToString(", ") + view.context.getString(R.string.studio_and) + people.last()
         peopleView?.text = names
         peopleView?.visibility = if (names.isEmpty()) View.GONE else View.VISIBLE
         whereView?.visibility = if (place.isEmpty() && names.isEmpty()) View.GONE else View.VISIBLE
+        if (suppressed) return
         fade(true)
         scheduleHide(SHOW_MS)
     }
@@ -114,7 +123,7 @@ class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin 
             val lift = if (isVisible) -((bar?.height ?: 0).coerceAtLeast(MIN_BAR_PX)).toFloat() else 0f
             place.animate().translationY(lift).setDuration(220L).start()
         }
-        if (shownAssetId == null) return
+        if (shownAssetId == null || suppressed) return
         if (isVisible) {
             root?.removeCallbacks(hide)
             fade(true)
@@ -150,9 +159,24 @@ class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin 
     }
 
     private companion object {
-        val TIME_WITH_SECONDS = Regex("""(\d{1,2}:\d{2}):\d{2}""")
         const val SHOW_MS = 4500L
         const val MIN_BAR_PX = 150
         const val AFTER_CONTROLS_MS = 2500L
     }
+}
+
+private val TIME_WITH_SECONDS = Regex("""(\d{1,2}:\d{2}):\d{2}""")
+
+/** "14:32:05" -> "14:32 Uhr"; null when the photo has no time. */
+internal fun formatTimeOfDay(context: Context, raw: String?): String? {
+    val time = raw?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+    val short = TIME_WITH_SECONDS.matchEntire(time)?.groupValues?.get(1) ?: time
+    return context.getString(R.string.studio_time_of_day, short)
+}
+
+/** "Anna, Papa, Leo" -> "Anna, Papa und Leo". */
+internal fun formatPeople(context: Context, raw: String?): String {
+    val people = raw?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }.orEmpty()
+    return if (people.size < 2) people.joinToString() else
+        people.dropLast(1).joinToString(", ") + context.getString(R.string.studio_and) + people.last()
 }

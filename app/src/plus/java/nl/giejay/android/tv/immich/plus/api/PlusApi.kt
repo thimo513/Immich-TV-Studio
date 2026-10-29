@@ -11,8 +11,11 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
 import java.util.Locale
 
 interface PlusApiService {
@@ -26,7 +29,24 @@ interface PlusApiService {
     // one representative asset per city, used by the "Places" page of the Immich web app
     @GET("search/cities")
     suspend fun cities(): Response<List<Asset>>
+
+    // non-destructive edits (Immich 3): the original stays, Immich renders an edited version
+    @GET("assets/{id}/edits")
+    suspend fun edits(@Path("id") assetId: String): Response<AssetEdits>
+
+    @PUT("assets/{id}/edits")
+    suspend fun putEdits(@Path("id") assetId: String, @Body request: AssetEditsRequest): Response<AssetEdits>
+
+    @DELETE("assets/{id}/edits")
+    suspend fun deleteEdits(@Path("id") assetId: String): Response<Unit>
 }
+
+/** One edit of an asset: action "crop", "rotate" or "mirror" with its parameters (rotate: angle). */
+data class AssetEdit(val action: String, val parameters: Map<String, Any>)
+
+data class AssetEdits(val assetId: String?, val edits: List<AssetEdit>?)
+
+data class AssetEditsRequest(val edits: List<AssetEdit>)
 
 // Immich v3 rejects unknown properties, so only fields of SmartSearchDto are sent.
 // Gson skips null values, optional filters therefore disappear from the request.
@@ -93,6 +113,39 @@ object PlusApi {
         return executeAPICall(200) { service().cities() }
             .map { assets -> assets.filter { !it.exifInfo?.city.isNullOrBlank() } }
     }
+
+    /**
+     * Turns the asset by [quarterTurns] x 90 degrees clockwise, on top of what it already has.
+     * A PUT replaces all edits, so the existing ones (crop, mirror) are read first and kept; a
+     * rotation adding up to 360 degrees is dropped again, and without any edit left they are deleted.
+     */
+    suspend fun rotate(assetId: String, quarterTurns: Int): Either<String, Unit> {
+        val current = executeAPICall(200) { service().edits(assetId) }
+            .fold({ return Either.Left(it) }, { it.edits.orEmpty() })
+        val index = current.indexOfFirst { it.action == ROTATE }
+        val oldAngle = current.getOrNull(index)?.parameters?.get("angle")?.let { (it as? Number)?.toInt() } ?: 0
+        val angle = Math.floorMod(oldAngle + quarterTurns * 90, 360)
+        val rotation = AssetEdit(ROTATE, mapOf("angle" to angle))
+        val edits = when {
+            index < 0 && angle == 0 -> current
+            index < 0 -> current + rotation
+            angle == 0 -> current.filterIndexed { i, _ -> i != index }
+            else -> current.mapIndexed { i, edit -> if (i == index) rotation else edit }
+        }
+        return if (edits.isEmpty()) {
+            try {
+                val response = service().deleteEdits(assetId)
+                if (response.isSuccessful) Either.Right(Unit)
+                else Either.Left("Invalid status (${response.code()}) returned by Immich Server")
+            } catch (e: Exception) {
+                Either.Left(e.message ?: e.toString())
+            }
+        } else {
+            executeAPICall(200) { service().putEdits(assetId, AssetEditsRequest(edits)) }.map { }
+        }
+    }
+
+    private const val ROTATE = "rotate"
 
     private fun ContentType.toApiType(): String? = if (this == ContentType.ALL) null else toString()
 }

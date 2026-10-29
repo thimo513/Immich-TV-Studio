@@ -100,8 +100,11 @@ class StudioHomeFragment : RowsSupportFragment() {
     private var heroPriority = 0
     private var heroSubline: String? = null
 
-    private var viewCreatedAt = 0L
+    /** When each row was added: a row glides in when it is shown right after arriving. */
+    private val rowAddedAt = mutableMapOf<Long, Long>()
     private val enteredRows = mutableSetOf<Long>()
+    private var lastEntranceAt = 0L
+    private var entranceSlot = 0
 
     private var ambientUrl: String? = null
     private val ambientUpdate = Runnable { loadAmbient() }
@@ -154,7 +157,9 @@ class StudioHomeFragment : RowsSupportFragment() {
                 View.LAYER_TYPE_HARDWARE, Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN) }
             )
         }
-        viewCreatedAt = SystemClock.uptimeMillis()
+        // a new view (e.g. back from another page) shows its rows again: let them glide in once more
+        val now = SystemClock.uptimeMillis()
+        rowAddedAt.keys.forEach { rowAddedAt[it] = now }
         enteredRows.clear()
         showGreeting(view)
         heroUrl?.let { loadHeroImage(it) }
@@ -174,6 +179,7 @@ class StudioHomeFragment : RowsSupportFragment() {
     }
 
     override fun onDestroyView() {
+        hero?.findViewById<View>(R.id.studio_hero_image)?.animate()?.cancel()
         heroAnimator?.cancel()
         heroAnimator = null
         view?.removeCallbacks(ambientUpdate)
@@ -308,10 +314,20 @@ class StudioHomeFragment : RowsSupportFragment() {
         Glide.with(this).load(url).centerCrop().into(object : CustomTarget<Drawable>(HERO_WIDTH_PX, HERO_HEIGHT_PX) {
             override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
                 if (url != heroUrl) return
+                heroAnimator?.cancel()
                 image.alpha = 0f
+                image.scaleX = HERO_REVEAL_SCALE
+                image.scaleY = HERO_REVEAL_SCALE
+                image.translationX = 0f
                 image.setImageDrawable(resource)
-                image.animate().alpha(HERO_ALPHA).setDuration(1200L).start()
-                startKenBurns(image)
+                // it comes in from close up, then the camera starts gliding over it
+                image.animate().alpha(HERO_ALPHA).scaleX(KEN_BURNS_FROM).scaleY(KEN_BURNS_FROM)
+                    .setDuration(HERO_REVEAL_MS).setInterpolator(DecelerateInterpolator(2f))
+                    .withEndAction { if (hero != null) startKenBurns(image) }.start()
+                if (ambientUrl == null) {
+                    ambientUrl = url
+                    loadAmbient()
+                }
             }
 
             override fun onLoadCleared(placeholder: Drawable?) {
@@ -326,8 +342,8 @@ class StudioHomeFragment : RowsSupportFragment() {
         val pan = -48 * resources.displayMetrics.density
         heroAnimator = ObjectAnimator.ofPropertyValuesHolder(
             image,
-            PropertyValuesHolder.ofFloat(View.SCALE_X, 1.06f, 1.2f),
-            PropertyValuesHolder.ofFloat(View.SCALE_Y, 1.06f, 1.2f),
+            PropertyValuesHolder.ofFloat(View.SCALE_X, KEN_BURNS_FROM, KEN_BURNS_TO),
+            PropertyValuesHolder.ofFloat(View.SCALE_Y, KEN_BURNS_FROM, KEN_BURNS_TO),
             PropertyValuesHolder.ofFloat(View.TRANSLATION_X, 0f, pan)
         ).apply {
             duration = KEN_BURNS_MS
@@ -397,6 +413,7 @@ class StudioHomeFragment : RowsSupportFragment() {
         }
         val position = rowKeys.count { it < key }
         rowKeys.add(position, key)
+        rowAddedAt[key.toLong()] = SystemClock.uptimeMillis()
         rowsAdapter.add(position, ListRow(IconHeaderItem(key.toLong(), title, group?.icon ?: R.drawable.studio_ic_event), items))
         // rows load in any order: until the page is entered, the first row stays the selected one
         // (posted: the grid applies the insert first and would move the selection along with it)
@@ -431,18 +448,28 @@ class StudioHomeFragment : RowsSupportFragment() {
         findNavController().navigate(R.id.plusPlaceAssetsFragment, args)
     }
 
-    /** Rows that appear right after the page opens glide in from below, one after the other. */
+    /**
+     * Rows glide in from below as they arrive, one after the other. Only right after arriving:
+     * rows scrolled into view later are simply there.
+     */
     private inner class EntranceRowPresenter : ListRowPresenter(FocusHighlight.ZOOM_FACTOR_SMALL, false) {
         override fun onBindRowViewHolder(holder: RowPresenter.ViewHolder, item: Any) {
             super.onBindRowViewHolder(holder, item)
             val id = (item as? ListRow)?.id ?: return
-            if (SystemClock.uptimeMillis() - viewCreatedAt > ENTRANCE_WINDOW_MS || !enteredRows.add(id)) return
+            val now = SystemClock.uptimeMillis()
+            val addedAt = rowAddedAt[id] ?: return
+            if (now - addedAt > ENTRANCE_AFTER_ADD_MS || !enteredRows.add(id)) return
+            // rows arriving close together line up one after the other
+            entranceSlot = if (now - lastEntranceAt < ENTRANCE_STAGGER_MS * 3) entranceSlot + 1 else 0
+            lastEntranceAt = now
             val row = holder.view
             row.alpha = 0f
-            row.translationY = 56 * row.resources.displayMetrics.density
-            row.animate().alpha(1f).translationY(0f)
-                .setStartDelay(((enteredRows.size - 1) * ENTRANCE_STAGGER_MS).coerceAtMost(ENTRANCE_MAX_DELAY_MS))
-                .setDuration(600L).setInterpolator(DecelerateInterpolator(2f)).start()
+            row.translationY = ENTRANCE_LIFT_DP * row.resources.displayMetrics.density
+            row.scaleX = ENTRANCE_SCALE
+            row.scaleY = ENTRANCE_SCALE
+            row.animate().alpha(1f).translationY(0f).scaleX(1f).scaleY(1f)
+                .setStartDelay((entranceSlot * ENTRANCE_STAGGER_MS).coerceAtMost(ENTRANCE_MAX_DELAY_MS))
+                .setDuration(800L).setInterpolator(DecelerateInterpolator(2.5f)).start()
         }
     }
 
@@ -484,14 +511,20 @@ class StudioHomeFragment : RowsSupportFragment() {
         private const val HERO_MEMORY = 2
         private const val HERO_WIDTH_PX = 1280
         private const val HERO_HEIGHT_PX = 720
-        private const val HERO_ALPHA = 0.9f
-        private const val KEN_BURNS_MS = 24_000L
+        private const val HERO_ALPHA = 1f
+        private const val HERO_REVEAL_SCALE = 1.35f
+        private const val HERO_REVEAL_MS = 1800L
+        private const val KEN_BURNS_FROM = 1.06f
+        private const val KEN_BURNS_TO = 1.22f
+        private const val KEN_BURNS_MS = 22_000L
 
         private const val AMBIENT_DELAY_MS = 450L
 
-        private const val ENTRANCE_WINDOW_MS = 2500L
-        private const val ENTRANCE_STAGGER_MS = 90L
-        private const val ENTRANCE_MAX_DELAY_MS = 540L
+        private const val ENTRANCE_AFTER_ADD_MS = 1500L
+        private const val ENTRANCE_STAGGER_MS = 130L
+        private const val ENTRANCE_MAX_DELAY_MS = 780L
+        private const val ENTRANCE_LIFT_DP = 110
+        private const val ENTRANCE_SCALE = 0.94f
 
         @ColorRes
         private fun rowColor(key: Int): Int = when (key) {

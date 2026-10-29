@@ -62,6 +62,21 @@
     <string name="studio_greeting_evening">Good evening, %1$s</string>
     <string name="studio_greeting_night">Good night, %1$s</string>
     <string name="studio_hero_memory">%1$s today: %2$s</string>
+
+    <string name="studio_info">Info</string>
+    <string name="studio_info_title">Photo info</string>
+    <string name="studio_info_date">Date</string>
+    <string name="studio_info_time">Time</string>
+    <string name="studio_info_place">Place</string>
+    <string name="studio_info_people">People</string>
+    <string name="studio_info_camera">Camera</string>
+    <string name="studio_info_album">Album</string>
+    <string name="studio_info_description">Description</string>
+    <string name="studio_info_file">File</string>
+    <string name="studio_rotate">Rotate</string>
+    <string name="studio_rotate_save">Save rotation</string>
+    <string name="studio_rotate_saved">Rotation saved</string>
+    <string name="studio_rotate_failed">Could not save the rotation: %1$s</string>
     <string name="studio_error_connection">No connection to the Immich server right now. Is the server on and the TV online?</string>
     <string name="studio_error_auth">The Immich server refused the sign-in. Please try again in a moment; if it keeps happening, check the API key in the settings.</string>
 </resources>
