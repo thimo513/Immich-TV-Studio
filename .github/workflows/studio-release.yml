@@ -70,7 +70,7 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.jks"
           export RELEASE_KEYSTORE_PATH="$RUNNER_TEMP/release.jks"
           chmod +x gradlew
-          ./gradlew assembleRelease testReleaseUnitTest
+          ./gradlew assembleRelease testDebugUnitTest
           cp "$(ls -1 app/build/outputs/apk/release/*.apk | head -n 1)" "$APK_NAME"
 
       - name: Publish release
