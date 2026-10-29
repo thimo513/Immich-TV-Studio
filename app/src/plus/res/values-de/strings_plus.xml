@@ -52,6 +52,14 @@
 
     <string name="studio_show_all">Alle ansehen</string>
     <string name="studio_time_of_day">%1$s Uhr</string>
+    <string name="studio_and">" und "</string>
+
+    <string name="studio_greeting_morning">Guten Morgen, %1$s</string>
+    <string name="studio_greeting_noon">Schönen Mittag, %1$s</string>
+    <string name="studio_greeting_afternoon">Schönen Nachmittag, %1$s</string>
+    <string name="studio_greeting_evening">Guten Abend, %1$s</string>
+    <string name="studio_greeting_night">Gute Nacht, %1$s</string>
+    <string name="studio_hero_memory">Heute %1$s: %2$s</string>
     <string name="studio_error_connection">Gerade keine Verbindung zum Immich-Server. Ist der Server an und der Fernseher im Netz?</string>
     <string name="studio_error_auth">Der Immich-Server hat die Anmeldung abgelehnt. Bitte gleich nochmal versuchen; passiert das öfter, den API-Schlüssel in den Einstellungen prüfen.</string>
 </resources>

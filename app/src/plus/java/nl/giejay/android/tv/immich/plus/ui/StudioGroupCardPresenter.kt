@@ -44,6 +44,10 @@ class StudioGroupCardPresenter(private val shape: CardShape) : Presenter() {
     override fun onBindViewHolder(viewHolder: ViewHolder, item: Any?) {
         val card = item as? StudioGroupCard ?: return
         val view = viewHolder.view
+        // Leanback's row helper swaps in its own, almost square clip outline after the view was
+        // created, so the photo stuck out of the rounded frame at the corners; restore ours
+        view.outlineProvider = ViewOutlineProvider.BACKGROUND
+        view.clipToOutline = true
         val context = view.context
         view.findViewById<TextView>(R.id.studio_group_title).text = card.title
         view.findViewById<ImageView>(R.id.studio_group_icon).apply {

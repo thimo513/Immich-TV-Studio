@@ -52,6 +52,16 @@
 
     <string name="studio_show_all">See all</string>
     <string name="studio_time_of_day">%1$s</string>
+    <string name="studio_and">" and "</string>
+
+    <!-- start page greeting; the name is the person this app was made for -->
+    <string name="studio_greeting_name" translatable="false">Ralph</string>
+    <string name="studio_greeting_morning">Good morning, %1$s</string>
+    <string name="studio_greeting_noon">Hello, %1$s</string>
+    <string name="studio_greeting_afternoon">Good afternoon, %1$s</string>
+    <string name="studio_greeting_evening">Good evening, %1$s</string>
+    <string name="studio_greeting_night">Good night, %1$s</string>
+    <string name="studio_hero_memory">%1$s today: %2$s</string>
     <string name="studio_error_connection">No connection to the Immich server right now. Is the server on and the TV online?</string>
     <string name="studio_error_auth">The Immich server refused the sign-in. Please try again in a moment; if it keeps happening, check the API key in the settings.</string>
 </resources>

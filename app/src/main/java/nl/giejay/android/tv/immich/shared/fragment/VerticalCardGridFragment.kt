@@ -315,10 +315,10 @@ abstract class VerticalCardGridFragment<ITEM> : GridFragment() {
             Timber.i("Could not load background because background url is null")
             return
         }
-        // Studio: an ambient backdrop instead of the full photo: a tiny version (soft when scaled
-        // up by the BackgroundManager) under a dark tint, so it never competes with the cards
-        val width: Int = (mMetrics.widthPixels / 24).coerceAtLeast(1)
-        val height: Int = (mMetrics.heightPixels / 24).coerceAtLeast(1)
+        // Studio: ambient light instead of the full photo: only the photo's colour zones (see
+        // StudioAmbient) under a dark tint, so it never competes with the cards
+        val width: Int = nl.giejay.android.tv.immich.plus.ui.StudioAmbient.WIDTH_PX
+        val height: Int = nl.giejay.android.tv.immich.plus.ui.StudioAmbient.HEIGHT_PX
         try {
             Glide.with(requireActivity())
                 .load(backgroundUrl)
@@ -333,7 +333,7 @@ abstract class VerticalCardGridFragment<ITEM> : GridFragment() {
                         try {
                             (resource as? android.graphics.drawable.BitmapDrawable)?.isFilterBitmap = true
                             mBackgroundManager?.drawable = android.graphics.drawable.LayerDrawable(
-                                arrayOf(resource, android.graphics.drawable.ColorDrawable(0xD917120F.toInt()))
+                                arrayOf(resource, android.graphics.drawable.ColorDrawable(nl.giejay.android.tv.immich.plus.ui.StudioAmbient.TINT))
                             )
                         } catch (e: Exception) {
                             Timber.e(e, "Could not set background")

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Top of the start page, behind the rows: a large photo drifting slowly (Ken Burns), fading into
+     the page, with the greeting of the time of day on top. Never focusable. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/studio_hero"
+    android:layout_width="match_parent"
+    android:layout_height="380dp"
+    android:clipChildren="true"
+    android:focusable="false"
+    android:importantForAccessibility="no">
+
+    <ImageView
+        android:id="@+id/studio_hero_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0"
+        android:scaleType="centerCrop" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/studio_hero_fade" />
+
+    <View
+        android:id="@+id/studio_hero_mask"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/studio_hero_mask" />
+
+    <LinearLayout
+        android:id="@+id/studio_hero_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="44dp"
+        android:clipChildren="false"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/studio_hero_icon"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:layout_marginEnd="14dp"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/studio_hero_greeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:shadowColor="#99000000"
+                android:shadowRadius="12"
+                android:textColor="@color/studio_peach"
+                android:textSize="34sp"
+                tools:text="Guten Abend, Ralph" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/studio_hero_subline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:layout_marginTop="2dp"
+            android:maxLines="1"
+            android:shadowColor="#99000000"
+            android:shadowRadius="10"
+            android:textColor="@color/studio_text_dim"
+            android:textSize="17sp"
+            tools:text="Heute vor 3 Jahren: 12 Fotos" />
+    </LinearLayout>
+</FrameLayout>

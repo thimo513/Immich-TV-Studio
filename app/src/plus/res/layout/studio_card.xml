@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Photo card: picture fills the card, caption sits on a gradient at the bottom -->
+<!-- Photo card: picture fills the card, caption sits on a gradient at the bottom, videos carry a
+     play badge with their length in the top right corner -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/studio_card_root"
     android:layout_width="206dp"
@@ -21,6 +22,27 @@
         android:layout_height="56dp"
         android:layout_gravity="bottom"
         android:background="@drawable/studio_card_scrim" />
+
+    <TextView
+        android:id="@+id/studio_card_video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="7dp"
+        android:background="@drawable/studio_video_badge"
+        android:drawableStart="@drawable/studio_ic_play"
+        android:drawablePadding="3dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:paddingStart="6dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="2dp"
+        android:textColor="@color/studio_text"
+        android:textSize="11sp"
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"

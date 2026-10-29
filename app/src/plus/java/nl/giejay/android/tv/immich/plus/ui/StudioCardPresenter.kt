@@ -41,10 +41,15 @@ class StudioCardPresenter(private val shape: CardShape = CardShape.WIDE) : Prese
     override fun onBindViewHolder(viewHolder: ViewHolder, item: Any?) {
         val card = item as? Card ?: return
         val view = viewHolder.view
+        // Leanback's row helper swaps in its own, almost square clip outline after the view was
+        // created, so the photo stuck out of the rounded frame at the corners; restore ours
+        view.outlineProvider = ViewOutlineProvider.BACKGROUND
+        view.clipToOutline = true
         val image = view.findViewById<ImageView>(R.id.studio_card_image)
         val title = view.findViewById<TextView>(R.id.studio_card_title)
         val subtitle = view.findViewById<TextView>(R.id.studio_card_subtitle)
         val scrim = view.findViewById<View>(R.id.studio_card_scrim)
+        val video = view.findViewById<TextView>(R.id.studio_card_video)
 
         view.tag = card
         title.text = card.title
@@ -52,6 +57,8 @@ class StudioCardPresenter(private val shape: CardShape = CardShape.WIDE) : Prese
         subtitle.text = card.description
         subtitle.visibility = if (card.description.isNullOrBlank()) View.GONE else View.VISIBLE
         scrim.visibility = if (card.title.isBlank() && card.description.isNullOrBlank()) View.GONE else View.VISIBLE
+        video.visibility = if (card.videoDuration != null) View.VISIBLE else View.GONE
+        video.text = card.videoDuration
 
         val url = card.thumbnailUrl
         if (url != null && url.startsWith("http")) {

@@ -19,7 +19,7 @@ import nl.giejay.mediaslider.view.MediaSliderController
 
 /**
  * Photo info of the viewer, replacing the configurable metadata lists: date and time top left,
- * place bottom right. It appears with every new photo and fades out after a few seconds, so it
+ * place and the people in the photo bottom right. It appears with every new photo and fades out after a few seconds, so it
  * never covers the picture for long. While the controls are open it stays visible.
  */
 class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin {
@@ -27,6 +27,8 @@ class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin 
     private var dateView: TextView? = null
     private var timeView: TextView? = null
     private var placeView: TextView? = null
+    private var peopleView: TextView? = null
+    private var whereView: View? = null
     private var shownAssetId: String? = null
     private var controlsVisible = false
     private val hide = Runnable { fade(false) }
@@ -37,6 +39,8 @@ class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin 
         dateView = view.findViewById(R.id.studio_info_date)
         timeView = view.findViewById(R.id.studio_info_time)
         placeView = view.findViewById(R.id.studio_info_place)
+        peopleView = view.findViewById(R.id.studio_info_people)
+        whereView = view.findViewById(R.id.studio_info_where)
         rootView.addView(view, ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.MATCH_PARENT,
             ConstraintLayout.LayoutParams.MATCH_PARENT
@@ -68,14 +72,15 @@ class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin 
             val time = item.get(MetaDataType.TIME)?.trim().orEmpty()
             val place = listOfNotNull(item.get(MetaDataType.CITY), item.get(MetaDataType.COUNTRY))
                 .map { it.trim() }.filter { it.isNotEmpty() }.distinct().joinToString(", ")
+            val people = item.get(MetaDataType.PEOPLE)?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }.orEmpty()
             withContext(Dispatchers.Main) {
                 if (shownAssetId != item.id) return@withContext
-                show(date, time, place)
+                show(date, time, place, people)
             }
         }
     }
 
-    private fun show(date: String, time: String, place: String) {
+    private fun show(date: String, time: String, place: String, people: List<String>) {
         val view = root ?: return
         dateView?.text = date
         dateView?.visibility = if (date.isEmpty()) View.GONE else View.VISIBLE
@@ -86,6 +91,12 @@ class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin 
             if (date.isEmpty() && shortTime.isEmpty()) View.GONE else View.VISIBLE
         placeView?.text = place
         placeView?.visibility = if (place.isEmpty()) View.GONE else View.VISIBLE
+        // "Anna, Papa und Leo"
+        val names = if (people.size < 2) people.joinToString() else
+            people.dropLast(1).joinToString(", ") + view.context.getString(R.string.studio_and) + people.last()
+        peopleView?.text = names
+        peopleView?.visibility = if (names.isEmpty()) View.GONE else View.VISIBLE
+        whereView?.visibility = if (place.isEmpty() && names.isEmpty()) View.GONE else View.VISIBLE
         fade(true)
         scheduleHide(SHOW_MS)
     }
@@ -97,8 +108,8 @@ class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin 
         config: MediaSliderConfiguration
     ) {
         controlsVisible = isVisible
-        // the place sits in the corner of the control bar: lift it above the bar while it is open
-        placeView?.let { place ->
+        // place and people sit in the corner of the control bar: lift them above it while it is open
+        whereView?.let { place ->
             val bar = rootView.findViewById<View>(com.zeuskartik.mediaslider.R.id.image_controller)
             val lift = if (isVisible) -((bar?.height ?: 0).coerceAtLeast(MIN_BAR_PX)).toFloat() else 0f
             place.animate().translationY(lift).setDuration(220L).start()
@@ -133,6 +144,8 @@ class StudioInfoOverlayPlugin : SliderViewPlugin<Unit?>, SliderControllerPlugin 
         dateView = null
         timeView = null
         placeView = null
+        peopleView = null
+        whereView = null
         shownAssetId = null
     }
 

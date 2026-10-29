@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Darkens the hero photo behind the greeting (left and top) so the text stays readable -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="0"
+                android:centerColor="#4017120F"
+                android:endColor="#0017120F"
+                android:startColor="#B317120F" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:endColor="#4017120F"
+                android:startColor="#3317120F" />
+        </shape>
+    </item>
+</layer-list>

@@ -33,5 +33,7 @@ data class Asset(
     val tags: List<Tag>?,
     val originalPath: String?,
     val originalFileName: String?,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    // videos: "h:mm:ss.ffffff", e.g. "0:00:42.000000"
+    val duration: String? = null
 )
