@@ -45,7 +45,8 @@ object UpdateChecker {
     private const val TAG_PREFIX = "studio-"
     private const val PREFS = "plus_updater"
     private const val KEY_LAST_CHECK = "last_check"
-    private val CHECK_INTERVAL_MS = TimeUnit.HOURS.toMillis(24)
+    // every time the app is opened; the short pause only keeps "Later" from coming back right away
+    private val CHECK_INTERVAL_MS = TimeUnit.MINUTES.toMillis(10)
 
     private val http = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
