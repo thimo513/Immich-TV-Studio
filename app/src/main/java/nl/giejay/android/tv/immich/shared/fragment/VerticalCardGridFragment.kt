@@ -333,7 +333,7 @@ abstract class VerticalCardGridFragment<ITEM> : GridFragment() {
                         try {
                             (resource as? android.graphics.drawable.BitmapDrawable)?.isFilterBitmap = true
                             mBackgroundManager?.drawable = android.graphics.drawable.LayerDrawable(
-                                arrayOf(resource, android.graphics.drawable.ColorDrawable(0xD910131A.toInt()))
+                                arrayOf(resource, android.graphics.drawable.ColorDrawable(0xD917120F.toInt()))
                             )
                         } catch (e: Exception) {
                             Timber.e(e, "Could not set background")

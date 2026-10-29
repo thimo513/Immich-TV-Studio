@@ -15,7 +15,9 @@
         </intent>
     </queries>
 
-    <application>
+    <!-- Classic Back key handling: with predictive back (Android 16, targetSdk 36+) the Leanback
+         menu does not reopen on Back and a second Back closes the app -->
+    <application android:enableOnBackInvokedCallback="false">
 
         <!-- The fork builds with a placeholder google-services.json: send nothing to Firebase -->
         <meta-data

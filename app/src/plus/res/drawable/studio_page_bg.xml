@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Page backdrop: warm brown glow from the top left, a hint of dusk blue at the bottom right -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/studio_bg" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:centerX="0.15"
+                android:centerY="0.0"
+                android:endColor="#0017120F"
+                android:gradientRadius="1400dp"
+                android:startColor="@color/studio_bg_top"
+                android:type="radial" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:centerX="1.0"
+                android:centerY="1.0"
+                android:endColor="#0017120F"
+                android:gradientRadius="1000dp"
+                android:startColor="#661E2A35"
+                android:type="radial" />
+        </shape>
+    </item>
+</layer-list>

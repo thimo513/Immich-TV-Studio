@@ -49,4 +49,9 @@
     <string name="plus_update_later">Später</string>
     <string name="plus_update_downloading">Update wird heruntergeladen…</string>
     <string name="plus_update_failed">Update fehlgeschlagen: %1$s</string>
+
+    <string name="studio_show_all">Alle ansehen</string>
+    <string name="studio_time_of_day">%1$s Uhr</string>
+    <string name="studio_error_connection">Gerade keine Verbindung zum Immich-Server. Ist der Server an und der Fernseher im Netz?</string>
+    <string name="studio_error_auth">Der Immich-Server hat die Anmeldung abgelehnt. Bitte gleich nochmal versuchen; passiert das öfter, den API-Schlüssel in den Einstellungen prüfen.</string>
 </resources>

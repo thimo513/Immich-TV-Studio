@@ -12,6 +12,9 @@ import androidx.navigation.fragment.findNavController
 import nl.giejay.android.tv.immich.R
 import nl.giejay.android.tv.immich.shared.prefs.API_KEY
 import nl.giejay.android.tv.immich.shared.prefs.PreferenceManager
+import nl.giejay.android.tv.immich.plus.viewer.StudioInfoOverlayPlugin
+import nl.giejay.mediaslider.plugin.DateOverlayViewPlugin
+import nl.giejay.mediaslider.plugin.MetadataViewPlugin
 import nl.giejay.mediaslider.plugin.TimelineStoryProgressPlugin
 import nl.giejay.mediaslider.view.MediaSliderFragment
 import nl.giejay.mediaslider.view.MediaSliderView
@@ -59,8 +62,12 @@ class ImmichMediaSlider : MediaSliderFragment() {
 
         if (!alreadyConfigured) {
             val enabledPlugins = PreferenceManager.createEnabledSliderPlugins(lifecycleScope, favoriteService)
-            config.controllerPlugins += enabledPlugins.controllerPlugins
-            config.viewPlugins += enabledPlugins.viewPlugins
+            // Studio: one fixed photo info (date + time top left, place bottom right, fades out)
+            // instead of the configurable metadata lists and the separate date line
+            val isOldInfo = { plugin: Any -> plugin is MetadataViewPlugin || plugin is DateOverlayViewPlugin }
+            val info = StudioInfoOverlayPlugin()
+            config.controllerPlugins += enabledPlugins.controllerPlugins.filterNot(isOldInfo) + info
+            config.viewPlugins += enabledPlugins.viewPlugins.filterNot(isOldInfo) + info
             config.keyEventPlugins += enabledPlugins.keyEventPlugins
             // zoom levels for photos (first in the key list, so it sees the arrow keys while zoomed)
             nl.giejay.android.tv.immich.plus.zoom.ZoomPlugin().let { zoom ->

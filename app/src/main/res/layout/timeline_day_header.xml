@@ -8,5 +8,5 @@
     android:paddingTop="20dp"
     android:paddingBottom="20dp"
     android:textAppearance="?android:attr/textAppearanceMedium"
-    android:textColor="@android:color/white"
+    android:textColor="@color/studio_latte"
     android:textStyle="bold" />

@@ -79,7 +79,9 @@ class SmartSearchFragment : GenericAssetFragment() {
                         event.keyCode == KeyEvent.KEYCODE_ENTER ||
                         event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER
                     val isUp = event.keyCode == KeyEvent.KEYCODE_DPAD_UP
-                    // UP only counts above the results; on the start panel it is plain navigation
+                    // UP only counts above the results; on the start panel it is plain navigation.
+                    // Keys pressed in the menu never count: the page is only entered with OK.
+                    if (view?.hasFocus() != true) return@collect
                     if ((isOk && assets.isEmpty() && lastQuery != null) || (isUp && assets.isNotEmpty())) {
                         showSearchDialog()
                     }
@@ -112,9 +114,10 @@ class SmartSearchFragment : GenericAssetFragment() {
             gridFrame?.visibility = View.GONE
         } else {
             // hand the focus to the grid frame before the focused chip disappears, otherwise it
-            // falls back to the menu
+            // falls back to the menu. Only then: when the page is merely shown behind the menu
+            // (scrolling past "Suche"), the focus stays in the menu.
             gridFrame?.visibility = View.VISIBLE
-            gridFrame?.requestFocus()
+            if (emptyHint?.hasFocus() == true) gridFrame?.requestFocus()
             emptyHint?.visibility = View.GONE
         }
     }
@@ -124,10 +127,10 @@ class SmartSearchFragment : GenericAssetFragment() {
         val density = resources.displayMetrics.density
         fun dp(value: Int) = (value * density).toInt()
 
-        fun label(text: String, sizeSp: Float, topDp: Int) = TextView(context).apply {
+        fun label(text: String, sizeSp: Float, topDp: Int, color: Int = R.color.studio_latte) = TextView(context).apply {
             this.text = text
             setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
-            setTextColor(ContextCompat.getColor(context, R.color.studio_text))
+            setTextColor(ContextCompat.getColor(context, color))
             setPadding(0, dp(topDp), 0, dp(10))
             gravity = Gravity.CENTER
         }
@@ -154,7 +157,7 @@ class SmartSearchFragment : GenericAssetFragment() {
         return LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
-            addView(label(getString(R.string.plus_search_title_empty), 30f, 0))
+            addView(label(getString(R.string.plus_search_title_empty), 32f, 0, R.color.studio_peach))
             addView(row(listOf(chip(getString(R.string.studio_search_custom)) { showSearchDialog() })))
             val recent = recentSearches(context)
             if (recent.isNotEmpty()) {
@@ -207,7 +210,7 @@ class SmartSearchFragment : GenericAssetFragment() {
 
     override fun openPopUpMenu() {
         // right edge of the results; on the start panel RIGHT is plain navigation between chips
-        if (lastQuery != null) showSearchDialog()
+        if (lastQuery != null && view?.hasFocus() == true) showSearchDialog()
     }
 
     private fun search(query: String) {
@@ -241,8 +244,9 @@ class SmartSearchFragment : GenericAssetFragment() {
             setText(lastQuery.orEmpty())
             setSelection(text.length)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-            setTextColor(Color.WHITE)
-            setHintTextColor(0x99FFFFFF.toInt())
+            setTextColor(ContextCompat.getColor(context, R.color.studio_text))
+            setHintTextColor(ContextCompat.getColor(context, R.color.studio_text_dim))
+            backgroundTintList = ContextCompat.getColorStateList(context, R.color.studio_apricot)
         }
         fun submit() {
             dialog.dismiss()
@@ -252,6 +256,12 @@ class SmartSearchFragment : GenericAssetFragment() {
             text = label
             isAllCaps = false
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            setTextColor(ContextCompat.getColorStateList(context, R.color.studio_chip_text))
+            background = ContextCompat.getDrawable(context, R.drawable.studio_chip_bg)
+            minHeight = 0
+            minimumHeight = 0
+            stateListAnimator = null
+            setPadding(dp(20), dp(8), dp(20), dp(8))
             setOnClickListener { onClick() }
         }
 
@@ -269,18 +279,22 @@ class SmartSearchFragment : GenericAssetFragment() {
             }
             addView(button(getString(android.R.string.cancel)) { dialog.dismiss() })
             addView(button(getString(R.string.plus_search_action)) { submit() })
+            for (i in 0 until childCount) {
+                (getChildAt(i).layoutParams as LinearLayout.LayoutParams).marginStart = dp(10)
+            }
         }
         val content = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(24), dp(20), dp(24), dp(16))
             background = GradientDrawable().apply {
-                setColor(0xF2202124.toInt())
-                cornerRadius = dp(12).toFloat()
+                setColor(ContextCompat.getColor(context, R.color.studio_surface))
+                setStroke(dp(1), 0x33FFE7D6)
+                cornerRadius = dp(22).toFloat()
             }
             addView(TextView(context).apply {
                 text = getString(R.string.plus_search_dialog_title)
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-                setTextColor(Color.WHITE)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+                setTextColor(ContextCompat.getColor(context, R.color.studio_peach))
             })
             addView(input, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
                 topMargin = dp(12)

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Frosted pill behind the photo info: dark warm glass with a faint light rim -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#D9181311" />
+    <stroke android:width="1dp" android:color="#33FFE7D6" />
+    <corners android:radius="22dp" />
+</shape>

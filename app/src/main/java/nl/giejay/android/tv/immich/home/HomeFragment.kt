@@ -2,6 +2,7 @@ package nl.giejay.android.tv.immich.home
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.leanback.app.BrowseSupportFragment
@@ -41,6 +42,19 @@ class HomeFragment : BrowseSupportFragment() {
     private lateinit var rows: List<PageRow>
     val immichRowPresenter = ImmichRowPresenter()
 
+    /** Back in the menu first returns to "Start"; only Back on "Start" leaves the app. */
+    private val backToStart = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            setSelectedPosition(0, true)
+            isEnabled = false
+        }
+    }
+
+    private fun updateBackToStart(menuPosition: Int = headersSupportFragment.selectedPosition) {
+        // menuPosition: the menu entry under the cursor (selectedPosition only follows it delayed)
+        backToStart.isEnabled = isShowingHeaders && menuPosition > 0
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -54,8 +68,13 @@ class HomeFragment : BrowseSupportFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, backToStart)
+        setBrowseTransitionListener(object : BrowseTransitionListener() {
+            override fun onHeadersTransitionStop(withHeaders: Boolean) = updateBackToStart()
+        })
         headersSupportFragment.setOnHeaderViewSelectedListener { _, row ->
             selectedPosition = row?.let { mRowsAdapter.indexOf(it) } ?: 0
+            updateBackToStart(row?.let { mRowsAdapter.indexOf(it) } ?: 0)
             val name = row?.headerItem?.name ?: "-"
             // Full-bleed pages (timeline, start, search) never show the Leanback page title
             // (it flashes and slides away when entering the page, or overlaps their content).
@@ -123,6 +142,24 @@ class HomeFragment : BrowseSupportFragment() {
         mRowsAdapter.addAll(0, rows.filter { !PreferenceManager.itemInStringSet(it.headerItem.name, HIDDEN_HOME_ITEMS) })
     }
 
+    /** True when the menu currently shows an entry called [name] (entries can be hidden). */
+    fun hasSection(name: String): Boolean = sectionPosition(name) != null
+
+    /**
+     * Opens the menu page [name] as if it was picked in the menu, used by the "see all" tiles of
+     * the start page. The new page takes the focus once it is created; Back leads to the menu.
+     */
+    fun openSection(name: String) {
+        val position = sectionPosition(name) ?: return
+        setSelectedPosition(position, false)
+        view?.postDelayed({
+            if (isAdded && !isShowingHeaders) mainFragment?.view?.requestFocus()
+        }, SECTION_FOCUS_DELAY_MS)
+    }
+
+    private fun sectionPosition(name: String): Int? =
+        (0 until mRowsAdapter.size()).firstOrNull { (mRowsAdapter.get(it) as? Row)?.headerItem?.name == name }
+
     private fun createRows(): List<PageRow> {
         return HEADERS.mapIndexed { index, header -> PageRow(IconHeaderItem(index.toLong(), header.name, header.icon)) }
     }
@@ -136,6 +173,8 @@ class HomeFragment : BrowseSupportFragment() {
     }
 
     companion object {
+        private const val SECTION_FOCUS_DELAY_MS = 350L
+
         private fun text(id: Int) = ImmichApplication.appContext!!.getString(id)
 
         private val HEADERS: List<Header> = listOf(

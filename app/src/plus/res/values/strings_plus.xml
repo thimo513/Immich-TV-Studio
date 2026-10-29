@@ -49,4 +49,9 @@
     <string name="plus_update_later">Later</string>
     <string name="plus_update_downloading">Downloading update…</string>
     <string name="plus_update_failed">Update failed: %1$s</string>
+
+    <string name="studio_show_all">See all</string>
+    <string name="studio_time_of_day">%1$s</string>
+    <string name="studio_error_connection">No connection to the Immich server right now. Is the server on and the TV online?</string>
+    <string name="studio_error_auth">The Immich server refused the sign-in. Please try again in a moment; if it keeps happening, check the API key in the settings.</string>
 </resources>

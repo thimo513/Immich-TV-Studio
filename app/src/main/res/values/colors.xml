@@ -16,18 +16,18 @@
 
 <resources>
     <!-- Warm dark gray for backgrounds -->
-    <color name="gray_dark">#10131A</color>
+    <color name="gray_dark">#17120F</color>
 
     <color name="black">#000000</color>
 
     <!-- Colors defined dedicated for TV screen white. -->
-    <color name="screen_white">#E8EAED</color>
-    <color name="screen_white_70">#B2E8EAED</color>
-    <color name="screen_white_60">#99E8EAED</color>
-    <color name="screen_white_10">#1AE8EAED</color>
+    <color name="screen_white">#F8EFE7</color>
+    <color name="screen_white_70">#B2F8EFE7</color>
+    <color name="screen_white_60">#99F8EFE7</color>
+    <color name="screen_white_10">#1AF8EFE7</color>
 
     <!-- Colors defined dedicated for TV screen black. -->
-    <color name="screen_black">#0E0E0F</color>
+    <color name="screen_black">#2B1A11</color>
 
     <color name="default_text_color">@color/screen_white</color>
     <color name="default_text_color_secondary">@color/screen_white_60</color>
@@ -37,20 +37,20 @@
     <color name="selected_card_footer_background_color">#F0F</color>
 
     <color name="action_button_ripple_color">@color/black</color>
-    <color name="action_button_background_focused_color">@color/screen_white</color>
+    <color name="action_button_background_focused_color">#FFF7B58C</color>
     <color name="action_button_background_unfocused_color">@color/screen_white_10</color>
     <color name="action_button_text_focused_color">@color/screen_black</color>
     <color name="action_button_text_unfocused_color">@color/screen_white_70</color>
 
     <color name="error_text">#EF9A9A</color>
 
-    <color name="settings_card_background">#FF1B1F2A</color>
-    <color name="settings_card_background_focussed">#FF3A3F4C</color>
+    <color name="settings_card_background">#FF2B221D</color>
+    <color name="settings_card_background_focussed">#FF5A4234</color>
 
-    <color name="progressbarColor">#ffffff</color>
+    <color name="progressbarColor">#FFF7B58C</color>
 
     <!-- Immich-like timeline scrubber accent -->
-    <color name="timeline_scrubber_accent">#FFFFC43C</color>
+    <color name="timeline_scrubber_accent">#FFF7B58C</color>
     <color name="timeline_scrubber_label">@color/screen_white</color>
     <color name="timeline_scrubber_dot">@color/screen_white_70</color>
 

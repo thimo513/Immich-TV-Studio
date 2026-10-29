@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Studio look for the photo viewer buttons (replaces the slider library's grey boxes):
+     warm glass, an apricot glow ring when focused -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#8CF7B58C" />
+            <stroke
+                android:width="3dp"
+                android:color="@color/studio_peach" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#B3F7B58C" />
+            <stroke
+                android:width="3dp"
+                android:color="@color/studio_peach" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#26FFE7D6" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+</selector>

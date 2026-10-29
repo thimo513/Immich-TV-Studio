@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Menu entry: icon + label, a soft pill when focused. Leanback attaches the header click
-     listener to this root view, so the root is also the focusable element. -->
+<!-- Menu entry: icon + label, a glowing apricot pill with dark text when focused. Leanback
+     attaches the header click listener to this root view, so the root is also the focusable
+     element; the children take over its focused state for their colours. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -8,17 +9,19 @@
     android:focusable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingTop="9dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="9dp">
+    android:paddingStart="18dp"
+    android:paddingTop="11dp"
+    android:paddingEnd="22dp"
+    android:paddingBottom="11dp">
 
     <ImageView
         android:id="@+id/row_visible"
         android:layout_width="22dp"
         android:layout_height="22dp"
         android:layout_marginEnd="10dp"
+        android:duplicateParentState="true"
         android:src="@drawable/closed_eye"
+        android:tint="@color/studio_menu_icon"
         android:visibility="gone" />
 
     <ImageView
@@ -26,15 +29,18 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginEnd="16dp"
-        android:importantForAccessibility="no" />
+        android:duplicateParentState="true"
+        android:importantForAccessibility="no"
+        android:tint="@color/studio_menu_icon" />
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:duplicateParentState="true"
         android:ellipsize="end"
         android:fontFamily="sans-serif-medium"
         android:maxLines="1"
-        android:textColor="@color/studio_text"
+        android:textColor="@color/studio_menu_text"
         android:textSize="19sp" />
 </LinearLayout>

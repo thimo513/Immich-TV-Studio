@@ -277,7 +277,9 @@ class MediaSliderController(
         val buttonRow = controllerRootView.findViewById<LinearLayout>(R.id.media_controller_button_row)
 
         // clear any existing plugin buttons from the previous page before adding new ones for this page
-        buttonRow.children.filter { it.tag == "controller_plugin_button" }.forEach { buttonRow.removeView(it) }
+        // (copy first: removing while walking the lazy sequence skipped every second button, which
+        // left a duplicate favorite heart next to the zoom button)
+        buttonRow.children.filter { it.tag == "controller_plugin_button" }.toList().forEach { buttonRow.removeView(it) }
 
         val isVideo = sliderItem.type == SliderItemType.VIDEO
         val hasSecondaryItem = sliderItem.hasSecondaryItem()

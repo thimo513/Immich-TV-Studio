@@ -1,18 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Immich TV Studio palette: deep blue-black surfaces, warm gold accent (matches the banner) -->
-    <color name="studio_bg">#FF10131A</color>
-    <color name="studio_menu_bg">#FF0B0D12</color>
-    <color name="studio_surface">#FF1B1F2A</color>
-    <color name="studio_accent">#FFFFC43C</color>
-    <color name="studio_text">#FFF1F3F8</color>
-    <color name="studio_text_dim">#B3F1F3F8</color>
+    <!-- Immich TV Studio palette: warm espresso surfaces with soft pastel accents
+         (apricot, peach, sky blue, rose, sage, caramel, lavender) -->
+    <color name="studio_bg">#FF17120F</color>
+    <color name="studio_bg_top">#FF2A1E18</color>
+    <color name="studio_menu_bg">#FF100C0A</color>
+    <color name="studio_surface">#FF2B221D</color>
+    <color name="studio_surface_high">#FF3A2E27</color>
+
+    <color name="studio_apricot">#FFF7B58C</color>
+    <color name="studio_peach">#FFFFCFA8</color>
+    <color name="studio_sky">#FF9CC8EE</color>
+    <color name="studio_rose">#FFF4A9BA</color>
+    <color name="studio_sage">#FFB6D4B0</color>
+    <color name="studio_latte">#FFDDBE9C</color>
+    <color name="studio_lavender">#FFC5B8F2</color>
+
+    <color name="studio_accent">@color/studio_apricot</color>
+    <color name="studio_on_accent">#FF2B1A11</color>
+    <color name="studio_on_accent_dim">#B32B1A11</color>
+    <color name="studio_text">#FFF8EFE7</color>
+    <color name="studio_text_dim">#B3F8EFE7</color>
     <color name="studio_focus_pill">#2EFFFFFF</color>
 
     <style name="StudioBrowseTitle" parent="Widget.Leanback.Title.Text">
         <item name="android:textSize">28sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textColor">@color/studio_text</item>
+        <item name="android:textColor">@color/studio_peach</item>
     </style>
 
     <style name="StudioRowHeader" parent="Widget.Leanback.Row.Header">
